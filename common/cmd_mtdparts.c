@@ -1547,12 +1547,6 @@ static int parse_mtdparts(const char *const mtdparts)
 		getenv_f("mtdparts", tmp_parts, MTDPARTS_MAXLEN);
 	}
 
-	if (strncmp(p, "mtdparts=", 9) != 0) {
-		printf("mtdparts variable doesn't start with 'mtdparts='\n");
-		return err;
-	}
-	p += 9;
-
 	while (p && (*p != '\0')) {
 		err = 1;
 		if ((device_parse(p, &p, &dev) != 0) || (!dev))

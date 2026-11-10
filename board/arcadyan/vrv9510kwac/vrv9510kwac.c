@@ -14,8 +14,10 @@
 #include <asm/lantiq/mem.h>
 #include <asm/arch/gphy.h>
 
+#define GPIO_WPS_BUTTON 6
 #define GPIO_SERVICE_BUTTON 22
 #define GPIO_POWER_LED 38
+#define GPIO_WIRELESS_LED 47
 #define GPIO_SERVICE_LED 41
 
 #if defined(CONFIG_SPL_BUILD)
@@ -46,6 +48,7 @@ static void gpio_init(void)
 	gpio_set_altfunc(49, GPIO_ALTSEL_SET, GPIO_ALTSEL_CLR, GPIO_DIR_OUT);
 
 	gpio_request(GPIO_SERVICE_LED, "");
+	gpio_request(GPIO_WIRELESS_LED, "");
 	gpio_request(GPIO_POWER_LED, "");
 	gpio_direction_output(GPIO_POWER_LED, 0);
 }
@@ -71,21 +74,24 @@ int board_early_init_f(void)
 int board_late_init(void)
 {
 #if defined(CONFIG_SYS_BOOT_NANDSPL)
-	char *first_boot = getenv("first-boot");
-	int service_button_pressed = !gpio_get_value(GPIO_SERVICE_BUTTON);
-	
-	if (strcmp(first_boot, "1") == 0) {
-		gpio_direction_output(GPIO_SERVICE_LED, 0);
-		setenv("bootcmd", "run move-boardconfig rescue-tftp");
-	} else if (service_button_pressed) {
+	if (!gpio_get_value(GPIO_SERVICE_BUTTON)) {
 		gpio_direction_output(GPIO_SERVICE_LED, 0);
 		printf("Service button pressed! Launching firmware via tftpboot...\n");
-		setenv("bootcmd", "run rescue-tftp");
-	} else {
-		setenv("bootcmd", "run sysboot");
+		setenv("tftp_rescue", "sleep 5; tftpboot rescue.bin && bootm $fileaddr");
+		setenv("bootcmd", "run tftp_rescue");
+		return 0;
 	}
-#else 
+
+	if (!gpio_get_value(GPIO_WPS_BUTTON)) {
+		gpio_direction_output(GPIO_WIRELESS_LED, 0);
+		printf("WPS button pressed! Launching OEM firmware...\n");
+		setenv("bootcmd", "run flash_flash2");
+		return 0;
+	}
 	
+	printf("Launching OpenWrt...\n");
+	setenv("flash_openwrt", "nand read $loadaddr $f_kernel_addr $f_kernel_size && bootm $loadaddr");
+	setenv("bootcmd", "run flash_openwrt");
 #endif
 
 	return 0;

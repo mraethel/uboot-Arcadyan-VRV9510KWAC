@@ -2879,10 +2879,26 @@ static int handle_dollar(o_string *dest, struct p_context *ctx, struct in_str *i
 			}
 			b_addchr(dest, SPECIAL_VAR_SYMBOL);
 			break;
-#ifndef __U_BOOT__
+#ifdef __U_BOOT__
 		case '(':
+			b_addchr(dest, SPECIAL_VAR_SYMBOL);
+			ctx->child->sp++;
 			b_getch(input);
-			process_command_subs(dest, ctx, input, ')');
+			/* XXX maybe someone will try to escape the ')' */
+			while(ch=b_getch(input),ch!=EOF && ch!=')') {
+				b_addchr(dest,ch);
+			}
+			if (ch != ')') {
+				syntax();
+				return 1;
+			}
+			b_addchr(dest, SPECIAL_VAR_SYMBOL);
+			break;
+#endif
+#ifndef __U_BOOT__
+		case '{':
+			b_getch(input);
+			process_command_subs(dest, ctx, input, '}');
 			break;
 		case '*':
 			sep[0]=ifs[0];

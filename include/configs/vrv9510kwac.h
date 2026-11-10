@@ -52,22 +52,18 @@
 #define CONFIG_SPL_U_BOOT_SIZE		0x60000
 #define CONFIG_ENV_IS_IN_NAND
 #define CONFIG_ENV_OVERWRITE
-#define CONFIG_ENV_OFFSET		0x80000
+#define CONFIG_ENV_OFFSET		0x6f00000
+#define CONFIG_ENV_OFFSET_REDUND	0x7000000
 #define CONFIG_ENV_SECT_SIZE		(128 * 1024)
 #define MTDPARTS_DEFAULT		\
-	"mtdparts=nand-xway:512k(uboot),128k(uboot_env),4m(kernel),122m(ubi),4k(board_config)"
-#define CONFIG_ENV_FIRSTBOOT \
-	"first-boot=1\0"
-
+	"mtdparts=ifx_nand:1m(uboot),7m(kernel),48m(rootfs),7m(kernel2),48m(rootfs2),1m(ubootcfg),1m(bakubootcfg),1m(pricfg),1m(seccfg),10m(pri_rw_fs),1m(manuf),-(BBT)"
 #else
 #define CONFIG_ENV_IS_NOWHERE
 #define MTDPARTS_DEFAULT		"mtdparts="
-#define CONFIG_ENV_FIRSTBOOT \
-	"first-boot=0\0"
 #endif
 
 #define CONFIG_ENV_SIZE			(128 * 1024)
-#define MTDIDS_DEFAULT			"nand0=nand-xway"
+#define MTDIDS_DEFAULT			"nand0=ifx_nand"
 
 /* Console */
 #define CONFIG_LTQ_ADVANCED_CONSOLE
@@ -80,19 +76,6 @@
 #define CONFIG_CMD_MISC
 #define CONFIG_CMD_ECHO
 #define CONFIG_CMD_TFTPPUT
-#define CONFIG_CMD_MOVE_BOARDCONFIG		 \
-	"move-boardconfig=nand read 0x81000000 0x0 0x16e1000 && " \
-	"nand erase 0x7ea0000 0x1000 && " \
-	"nand write 0x826e0000 0x7ea0000 0x1000 && " \
-	"setenv first-boot 0 && " \
-	"saveenv\0" 
-#define CONFIG_CMD_LOAD_TFTP_IMAGE		 \
-	"rescue-tftp=sleep 5;" \
-	"tftpboot rescue.bin &&" \
-	"bootm $fileaddr\0" 
-#define CONFIG_CMD_BOOTNAND \
-	"sysboot=nand read 0x81000000 0xa0000 0x400000 && "\
-	"bootm 0x81000000\0"
 
 /* Boot */
 #define CONFIG_MIPS_BOOT_FDT
@@ -105,15 +88,11 @@
 /* Environment */
 #define CONFIG_LOADADDR			CONFIG_SYS_LOAD_ADDR
 
-#define CONFIG_ENV_MTDPARTS			\
-	"mtdids="MTDIDS_DEFAULT"\0"		\
-	"mtdparts="MTDPARTS_DEFAULT"\0" 
-
 /* Ethernet */
 #if defined(CONFIG_LTQ_SUPPORT_ETHERNET)
 #define CONFIG_ETHADDR		00:01:02:03:04:05
-#define CONFIG_SERVERIP		192.168.1.2
-#define CONFIG_IPADDR		192.168.1.1
+#define CONFIG_SERVERIP		192.168.2.100
+#define CONFIG_IPADDR		192.168.2.1
 #endif
 
 /* Pull in default board configs for Lantiq XWAY VRX200 */
@@ -121,12 +100,6 @@
 #include <asm/arch/config.h>
 
 #define CONFIG_EXTRA_ENV_SETTINGS	\
-	CONFIG_ENV_LANTIQ_DEFAULTS	\
-	CONFIG_ENV_MTDPARTS \
-	CONFIG_ENV_FIRSTBOOT \
-	CONFIG_CMD_MOVE_BOARDCONFIG \
-	CONFIG_CMD_LOAD_TFTP_IMAGE \
-	CONFIG_CMD_BOOTNAND \
-	CONFIG_ENV_FIRSTBOOT
+	CONFIG_ENV_LANTIQ_DEFAULTS
 
 #endif /* __CONFIG_H */

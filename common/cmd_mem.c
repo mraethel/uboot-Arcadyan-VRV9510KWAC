@@ -1200,6 +1200,38 @@ mod_mem(cmd_tbl_t *cmdtp, int incrflag, int flag, int argc, char * const argv[])
 	return 0;
 }
 
+static int do_mem_cal(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	ulong	addr;
+	long	off;
+	ulong*	ptr;
+
+	if (argc < 3)
+		return CMD_RET_USAGE;
+
+	addr = simple_strtoul(argv[1], NULL, 16);
+	off = simple_strtoul(argv[2], NULL, 16);
+
+	printf("Calculating kernel offset: %s %s %s = %08lX\n", argv[1], (off >= 0 ? "+" : ""), argv[2], addr+off);
+
+	addr += off;
+
+	if (argc < 4)
+    return 0;
+
+	if (argv[3][0] < '0' || argv[3][0] > '9') {
+		char sCmd[128];
+		extern int run_command(const char *cmd, int flag);
+		sprintf(sCmd, "set %s 0x%08lX", argv[3], addr);
+		run_command(sCmd, 0);
+	} else {
+		ptr = (ulong *)simple_strtoul(argv[3], NULL, 16);
+		*ptr = addr;
+	}
+
+	return 0;
+}
+
 #ifdef CONFIG_CMD_CRC32
 
 static int do_mem_crc(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
@@ -1287,6 +1319,12 @@ U_BOOT_CMD(
 #else
 	"[.b, .w, .l] addr1 addr2 count"
 #endif
+);
+
+U_BOOT_CMD(
+	cal,	4,	1,	do_mem_cal,
+  "address calculation",
+  "value offset [addr|variable]\n    - compute address offset [save at addr or variable], in hexadecimal"
 );
 
 #ifdef CONFIG_CMD_CRC32
