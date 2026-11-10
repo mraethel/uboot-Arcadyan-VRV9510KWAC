@@ -745,6 +745,7 @@ endif
 endif
 
 LDFLAGS_u-boot += $(LDFLAGS_FINAL)
+LDFLAGS_u-boot += $(call ld-option, --no-dynamic-linker)
 ifneq ($(CONFIG_SYS_TEXT_BASE),)
 LDFLAGS_u-boot += -Ttext $(CONFIG_SYS_TEXT_BASE)
 endif
