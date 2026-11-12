@@ -37,30 +37,5 @@
         '';
       };
     };
-    devShells = let
-      devShellPackages = {
-        packages = with pkgs; [
-          bc
-          gcc
-          gnumake
-          lzop
-          pkgsCross.mips-linux-gnu.buildPackages.gcc
-        ];
-      };
-    in {
-      default = pkgs.mkShell devShellPackages // {
-        # shellHook = ''
-        #   CROSS_COMPILE=mips-unknown-linux-gnu-
-        # '';
-      };
-      custom = pkgs.mkShell devShellPackages // {
-        shellHook = ''
-          EDITOR=nvim \
-          LC_CTYPE=en_US.UTF-8 \
-          CROSS_COMPILE=mips-unknown-linux-gnu- \
-          exec ${ pkgs.zsh }/bin/zsh
-        '';
-      };
-    };
   });
 }
