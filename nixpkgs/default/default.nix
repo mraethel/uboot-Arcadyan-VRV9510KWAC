@@ -38,4 +38,7 @@
 
     runHook postInstall
   '';
+  shellHook = ''
+    export CROSS_COMPILE=mips-unknown-linux-gnu-
+  '';
 }
