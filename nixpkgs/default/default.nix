@@ -1,4 +1,5 @@
 {
+  bc,
   gcc15,
   gcc15Stdenv,
   lzop,
@@ -14,6 +15,7 @@
     patchShebangs scripts
   '';
   depsBuildBuild = [
+    bc
     gcc15
     lzop
     perl
